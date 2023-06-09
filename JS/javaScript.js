@@ -1,46 +1,151 @@
-// Getting Data 
-const gettingData = () => {
-    let billInput = parseInt(document.getElementById('bill-input').value)
-    let numberOfPersons = parseInt(document.getElementById('person').value)
-    const data = [billInput , numberOfPersons]
-    return data
+const buttons = document.querySelectorAll('.button');
+const buttonSelected = document.getElementsByClassName('active');    
+const reset = document.querySelector('#main-right #button-reset');
+const inputs = document.querySelectorAll('.input');
+const resultTip = document.querySelector('#result-tip');
+const resultTotal = document.querySelector('#result-total');
+const bill = document.querySelector('main #main-left #bill .input');
+const numberOfPeople = document.querySelector('main #main-left-bottom #number-people .input');
+const errorMessage = document.querySelector('.if-zero-number');
+const customTip = document.querySelector('.custom')
+
+
+
+customTip.addEventListener('click', calculateCustomTip);
+
+buttons.forEach((button) => {
+    button.addEventListener('click', calculateTip);
+})
+
+
+reset.addEventListener('click', resetAll)
+
+reset.addEventListener('mouseenter', ()=>{
+    reset.style.backgroundColor = 'var(--lightGrayishCyan )';
+});
+
+reset.addEventListener('mouseleave', ()=>{
+    reset.style.backgroundColor = '';
+});
+
+
+
+bill.oninput = function(event){
+    dealWithResetButton();
+
+    if(customTip.value !== '' && (numberOfPeople.value !== '' || numberOfPeople.value > 0) ){
+        calculate();
+    }
+    
 }
-// Percentage Five Calculating
-const percentFive = () => {
-    let value = gettingData()
-    calculating(value[0], value[1], 5)
+
+customTip.oninput = function(){  
+    dealWithResetButton();
+    
+    if((bill.value !== '' || bill.value < 0) && (numberOfPeople.value !== '' || numberOfPeople.value > 0) ){
+        calculate();
+    }
 }
-// Percentage Ten Calculating
-const percentTen = () => {
-    let value = gettingData()
-    calculating(value[0], value[1], 10)
+
+numberOfPeople.oninput = function(){
+    
+    dealWithResetButton();
+
+    if(numberOfPeople.value <= 0 || numberOfPeople.value === ''){
+        errorMessage.innerText = `can't be zero`;
+        errorMessage.style.color = 'red';
+        numberOfPeople.style.borderColor = 'red';
+        resultTip.innerText = '----';
+        resultTotal.innerText = '----';
+    }else{
+        errorMessage.innerText = ``;
+        numberOfPeople.style.borderColor = '';
+        calculate();
+    }   
 }
-// Percentage Fifteen Calculating
-const percentFifteen = () => {
-    let value = gettingData()
-    calculating(value[0], value[1], 15)
+
+
+function calculate(){
+    let tipPerPerson;
+    let totalPerPerson;
+    let tipPercentage;
+
+    if(buttonSelected.length == 0){
+        tipPercentage = 0;
+    }else{
+        if(customTip.classList.contains('active')){
+            tipPercentage = customTip.value;
+        }else{
+            tipPercentage = buttonSelected[0].value;
+        }    
+    }
+    
+    tipPerPerson = (bill.value * tipPercentage * 0.01)/numberOfPeople.value;
+    totalPerPerson = (bill.value/numberOfPeople.value) + tipPerPerson;
+    tipPerPerson = tipPerPerson.toFixed(2);   
+    totalPerPerson = totalPerPerson.toFixed(2);
+
+    resultTip.innerText = tipPerPerson;
+    resultTotal.innerText = totalPerPerson;
 }
-// Percentage twentyFive Calculating
-const percentTwentyFive = () => {
-    let value = gettingData()
-    calculating(value[0], value[1], 25)
+
+
+function calculateTip(){
+    buttons.forEach((button) => {
+        button.classList.remove('active');
+    });
+    this.classList.add('active');
+    customTip.classList.remove('active');
+    calculate();
 }
-// Percentage Fifty Calculating
-const percentFifty = () => {
-    let value = gettingData()
-    calculating(value[0], value[1], 50)
+
+
+function calculateCustomTip(){
+    buttons.forEach((button) => {
+        button.classList.remove('active');
+    });
+    this.classList.add('active');
+    
+    if((bill.value !== '' || bill.value < 0) && (numberOfPeople.value !== '' || numberOfPeople.value > 0) ){
+        calculate();
+    }
 }
-// Custom percentage Calculating 
-const inputFun = () => {
-    let value = gettingData()
-    calculating(value[0], value[1])
+
+
+
+function dealWithResetButton(){
+    if(customTip.value === '' && bill.value === '' && numberOfPeople.value === ''){
+        reset.disabled = true;
+        reset.classList.remove('has-reset-activated');
+        numberOfPeople.style.borderColor = '';
+    }else{
+        reset.disabled = false;
+        reset.classList.add('has-reset-activated');       
+    }
 }
-// calculating Function 
-const calculating = (bill, persons, percent) => {
-    let tip = bill * percent / 100
-    let result = tip / persons
-    let finalResult = result.toFixed(2)
-    let totalTip = parseInt((bill / persons) + +finalResult)
-    document.getElementById('result-tip').innerHTML = finalResult
-    document.getElementById('result-total').innerHTML = totalTip.toFixed(2)
+
+
+function resetAll(){
+    buttons.forEach((button) => {
+        button.classList.remove('active');
+    });
+
+    inputs.forEach((input) => {
+        input.value = '';
+    });
+
+    resultTip.innerText = '0.00';
+    resultTotal.innerText = '0.00';
+
+    reset.disabled = true;
+    errorMessage.innerText = ``;
+    numberOfPeople.style.borderColor = ''
+    reset.classList.remove('has-reset-activated');
+    reset.style.backgroundColor = '';
 }
+
+
+
+
+
+
